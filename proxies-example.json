@@ -1,0 +1,6 @@
+{
+    "proxies": [
+        {"protocol": "http", "domain": "domain", "port": 80, "username": "username", "password": "password"},
+        {"protocol": "https", "domain": "domain", "port": 80, "username": "username", "password": "password"}
+    ]
+}
