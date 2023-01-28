@@ -18,32 +18,12 @@ with open("proxies.json") as f:
     proxies = json.load(f)
 
 
-def probe_args(args: dict, required: dict):
-    exceptions = []
-
-    for req_arg, req_type in required.items():
-        if req_arg not in args:
-            exceptions.append(f'"{req_arg}" is a required query parameter that is missing.')
-
-        elif isinstance(req_type, re.Pattern) and not re.match(req_type, args[req_arg]):
-            exceptions.append(
-                f'Query parameter "{req_arg}" doesn\'t match assigned regex, if this argument is valid please contact my developer.'
-            )
-
-        elif not isinstance(args[req_arg], type) and not isinstance(
-            req_type, re.Pattern
-        ):
-            exceptions.append(
-                f'Query parameter "{req_arg}" expects type {type.__name__}, got {type(args[req_arg].__name__)} instead.'
-            )
-
-    return {"error": len(exceptions) > 0, "exceptions": exceptions}
-
-
-@router.get("/read", dependencies=[Depends(RateLimiter(times=1, seconds=5))])
-def read(request: Request):
+@router.get(
+    "/read",
+    dependencies=[Depends(RateLimiter(times=1, seconds=5))],
+)
+def read(request: Request, url: str, original_type: bool = False):
     params = request.query_params
-    required = {"url": URL_REGEX}
 
     allowed_content_types = [
         "application/json",
@@ -53,10 +33,6 @@ def read(request: Request):
         "text/plain",
         "text/x-python",
     ]
-
-    res = probe_args(params, required)
-    if res["error"]:
-        return res
 
     url = params.get("url")
     fmt_proxies = {
@@ -82,7 +58,7 @@ def read(request: Request):
 
     headers = {}
 
-    if params.get("as_original_content_type", "").lower() == "true":
+    if original_type:
         headers = {"Content-Type": content_type}
 
     return Response(resp.text, headers=headers)

@@ -3,6 +3,4 @@ class db:
     user = "syrice"
     password = "supersecretpassword"
 
-auth_routes = {
-    "/read"
-}
+auth_routes = []

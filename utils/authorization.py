@@ -12,10 +12,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 class Authorization:
-    def __init__(self, debug: bool = True, db_container_name: str = "api_db") -> None:
+    def __init__(self, debug: bool = True) -> None:
         self._db = None
         self._debug = debug
-        self._db_c_n = db_container_name
 
     @property
     def db(self):
@@ -24,14 +23,10 @@ class Authorization:
 
         return self._db
 
-    @property
-    def _host(self):
-        return "127.0.0.1" if self._debug else self._db_c_n
-
     async def initialize(self, app: FastAPI) -> None:
         self._db = await asyncpg.create_pool(
             database=settings.db.name,
-            host=self._host,
+            host="127.0.0.1",
             port="5432",
             user=settings.db.user,
             password=settings.db.password,
