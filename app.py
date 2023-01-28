@@ -85,4 +85,4 @@ for root, _, files in os.walk(os.path.join(rootdir, "routes")):
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
-    uvicorn.run("app:app", host="0.0.0.0", port=5000, reload=app.debug)
+    uvicorn.run("app:app", host="0.0.0.0", port=6500, reload=app.debug)
