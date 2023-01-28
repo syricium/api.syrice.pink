@@ -1,0 +1,12 @@
+[Unit]
+Description=syrice api
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/syrice/api
+ExecStart=sh start.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
