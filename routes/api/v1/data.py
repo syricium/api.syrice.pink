@@ -48,7 +48,10 @@ def read(request: Request, url: str, original_type: bool = False):
 
     resp = requests.head(url, timeout=10, allow_redirects=False, proxies=proxies)
     content_type = resp.headers.get("Content-Type", "").split(";")[0]
-    content_length: int = resp.headers.get("Content-Length", 0)
+    try:
+        content_length: int = int(resp.headers.get("Content-Length", 0))
+    except ValueError:
+        content_length = 0
     
     if content_length == 0:
         return {
