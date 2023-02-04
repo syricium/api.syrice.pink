@@ -39,35 +39,8 @@ def read(request: Request, url: str, original_type: bool = False):
         "text/x-python",
     ]
 
-    fmt_proxies = {
-        i[
-            "protocol"
-        ]: f"http://{i['username']}:{i['password']}@{i['domain']}:{i['port']}/"
-        for i in proxies["proxies"]
-    }
-
-    resp = requests.head(url, timeout=10, allow_redirects=False, proxies=proxies)
+    resp = requests.head(url, timeout=10, allow_redirects=False)
     content_type = resp.headers.get("Content-Type", "").split(";")[0]
-    try:
-        content_length: int = int(resp.headers.get("Content-Length", 0))
-    except ValueError:
-        content_length = 0
-    
-    if content_length == 0:
-        return {
-            "error": True,
-            "exceptions": [
-                f"Content Length is not provided by server"
-            ],
-        }
-        
-    if content_length > 8000000:
-        return {
-            "error": True,
-            "exceptions": [
-                f"File is over 8MB"
-            ],
-        }
 
     if content_type not in allowed_content_types:
         fmt_allowed_content_types = utils.format_list(allowed_content_types)
@@ -78,7 +51,7 @@ def read(request: Request, url: str, original_type: bool = False):
             ],
         }
 
-    resp = requests.get(url, allow_redirects=False, proxies=fmt_proxies)
+    resp = requests.get(url, allow_redirects=False)
 
     headers = {}
 
