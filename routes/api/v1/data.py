@@ -1,10 +1,12 @@
 import json
 import random
 import re
+from typing import Optional
 
 import requests
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi_limiter.depends import RateLimiter
+from urllib.parse import urlparse
 
 import utils
 
@@ -23,7 +25,10 @@ with open("proxies.json") as f:
     dependencies=[Depends(RateLimiter(times=1, seconds=5))],
 )
 def read(request: Request, url: str, original_type: bool = False):
-    params = request.query_params
+    parsed_url = urlparse(url)
+    
+    if parsed_url.netloc in ["127.0.0.1", "localhost"]:
+        return "fuck you"
 
     allowed_content_types = [
         "application/json",
@@ -34,7 +39,6 @@ def read(request: Request, url: str, original_type: bool = False):
         "text/x-python",
     ]
 
-    url = params.get("url")
     fmt_proxies = {
         i[
             "protocol"
@@ -44,6 +48,23 @@ def read(request: Request, url: str, original_type: bool = False):
 
     resp = requests.head(url, timeout=10, allow_redirects=False, proxies=proxies)
     content_type = resp.headers.get("Content-Type", "").split(";")[0]
+    content_length: int = resp.headers.get("Content-Length", 0)
+    
+    if content_length == 0:
+        return {
+            "error": True,
+            "exceptions": [
+                f"Content Length is not provided by server"
+            ],
+        }
+        
+    if content_length > 8000000:
+        return {
+            "error": True,
+            "exceptions": [
+                f"File is over 8MB"
+            ],
+        }
 
     if content_type not in allowed_content_types:
         fmt_allowed_content_types = utils.format_list(allowed_content_types)
